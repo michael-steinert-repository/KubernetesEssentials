@@ -182,7 +182,7 @@
     <img src="https://user-images.githubusercontent.com/29623199/133933595-afd7a003-7282-4959-abdb-faa0d680064c.JPG" alt="Kubectl" width="75%"/>
 </P>
 
-#### Kubectl Commands
+#### Kubectl Commands (Declarative Management)
 
 |Command|Description|
 |---|---|
@@ -194,6 +194,27 @@
 |kubectl get nodes|Get all (Master and Worker) Nodes in Cluster|
 |||
 
-# Logs of Node
+#### Kubectl Configuration (Imperative Management)
 
-minikube logs -node='minikube-m02'
+````shell 
+  kubectl apply -f pod.yaml
+````
+
+````yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-world
+  labels:
+    name: hello-world
+spec:
+  containers:
+    - name: hello-world
+      image: amigoscode/kubernetes:hello-world
+      resources:
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+      ports:
+        - containerPort: 80
+````
