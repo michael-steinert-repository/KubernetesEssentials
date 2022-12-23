@@ -191,9 +191,7 @@
 | kubectl get pods                                                            | Show all Pods (Containers) in Cluster        |
 | kubectl port-forward pod/hello-world 8080:80                                | Port-Forwarding for Pod (only for Testing)   |
 | kubectl delete pod hello-world/hello-world 8080:80                          | Deletes Pod                                  |
-|                                                                             |                                              |
 | kubectl get nodes                                                           | Get all (Master and Worker) Nodes in Cluster |
-|                                                                             |                                              |
 
 #### Kubectl Configuration (Imperative Management)
 
