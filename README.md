@@ -116,7 +116,7 @@
 
 - Kube Proxy is an Agent that runs on each Node through a DaemonSet
 - It is responsible for local Cluster Networking where each Node gets it own unique IP Address
-- It is responsible for Routing the Network Traffic as Loadbalancer for the Services
+- It is responsible for Routing the Network Traffic as Load Balancer for the Services
 
 ### Pods
 
@@ -135,13 +135,68 @@
 
 <hr>
 
+### Deployments
+
+- Pods should be only published through a Deployment
+- A Deployment is a Kubernetes Resource that manages the Release of a new Application through Creating the Pods and Replicate Sets
+- It provides Zero-Downtime Deployments - for Example if a Application contains a Bug and crushes the Deployment will release new Version fo the Application
+- It creates a **ReplicateSet** for an Application
+- A **ReplicateSet** ensurers that the desired Number of Pods are always running
+- ReplicaSets are using Control Loops that implements a Background Control Loop that checks the sired Number of Pods are always present on the Cluster
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/29623199/209465647-475647df-a426-408f-97b8-4cde0469a4e3.png" alt="Deployment" width="50%"/>
+</P>
+
+<hr>
+
+### Services
+
+- A Service allows to interact with Pods in a Deployment without Port-Forwarding or knowing their IP Addresses
+- The IP Address of a Service does not change - it is a stable IP Address
+- A Service has a stable IP Address, DNS Name and Port
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/29623199/209472908-0cb1c1ad-0f53-4774-9ffa-d03180b796df.png" alt="Service" width="75%"/>
+</P>
+
+- A Service can be one of the following Types: ClusterIP, NodePort, ExternalName and LoadBalancer
+
+#### ClusterIP
+
+- ClusterIP (Default) is used only for internal Access
+  <p align="center">
+    <img src="https://user-images.githubusercontent.com/29623199/209473002-685ef877-2884-4f22-b41b-14d7fdd15b7d.png" alt="Service" width="50%"/>
+  </P>
+
+#### NodePort
+
+- NodePort allows to open one specific Port an all Nodes
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/29623199/209473015-7b537872-1b15-4568-a817-211d328724ed.png" alt="Service" width="50%"/>
+</P>
+
+#### ExternalName
+
+- ExternalName does not have Selectors and uses DNS Names instead
+
+#### LoadBalancer
+
+- LoadBalancer exposes the Application to the Internet
+- It creates a Load Balancer per Service
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/29623199/209477834-fd68f5dc-ba13-4fa9-9781-9ed158467b60.png" alt="LoadBalancer" width="50%"/>
+</P>
+
+<hr>
+
 ## Managed Kubernetes
 
 - A managed Kubernetes abstract the Master Node so that only the Worker Node have to be set up
 - One managed Kubernetes Solution is Amazon Elastic Kubernetes Service
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/29623199/133920258-c8be5005-2e30-469a-87e8-7afac12f48ad.JPG" alt="Amazon Elastic Kubernetes Service" width="50%"/>
+  <img src="https://user-images.githubusercontent.com/29623199/133920258-c8be5005-2e30-469a-87e8-7afac12f48ad.JPG" alt="Amazon Elastic Kubernetes Service" width="75%"/>
 </P>
 
 - The Amazon EKS allows as Worker Nodes for the Cluster the following Options:
@@ -161,17 +216,16 @@
 | minikube status                      | Shows Status of Cluster                                |
 | minikube stop                        | Stops Cluster                                          |
 | minikube delete                      | Removes Cluster                                        |
-|                                      |                                                        |
-| minikube ssh                         | SSH into Node                                          |
+| minikube ssh --node minikube-m02     | SSH into Node                                          |
+| minikube service <node_name>         | SSH Tunnel into Node allows to interact with it        |
 | minikube ip --node minikube          | Gets IP address of Master Node                         |
 | minikube ip --node minikube-m02      | Gets IP address of Worker Node                         |
-|                                      |                                                        |
 | minikube logs -f                     | Getting and following Logs for Master Node             |
 | minikube logs --node minikube-m02 -f | Getting and following Logs for Master Node             |
 
 ### Kubectl
 
-- CLI (Command Line Interface) to interact with the Cluster which is provided by Minikube
+- Kubectl is a CLI (Command Line Interface) Tool to interact with the Cluster which is provided by Minikube
 - It allows running the following Commands against a Cluster:
   - Deploy
   - Inspect
@@ -185,35 +239,17 @@
 
 #### Kubectl Commands (Declarative Management)
 
-| Command                                                                     | Description                                  |
-| --------------------------------------------------------------------------- | -------------------------------------------- |
-| kubectl run hello-world --image=amigoscode/kubernetes:hello-world --port=80 | Runs a Pod (Container) in Cluster (Minikube) |
-| kubectl get pods                                                            | Show all Pods (Containers) in Cluster        |
-| kubectl port-forward pod/hello-world 8080:80                                | Port-Forwarding for Pod (only for Testing)   |
-| kubectl delete pod hello-world/hello-world 8080:80                          | Deletes Pod                                  |
-| kubectl get nodes                                                           | Get all (Master and Worker) Nodes in Cluster |
-
-#### Kubectl Configuration (Imperative Management)
-
-```shell
-  kubectl apply -f pod.yaml
-```
-
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: hello-world
-  labels:
-    name: hello-world
-spec:
-  containers:
-    - name: hello-world
-      image: amigoscode/kubernetes:hello-world
-      resources:
-        limits:
-          memory: '128Mi'
-          cpu: '500m'
-      ports:
-        - containerPort: 80
-```
+| Command                                                           | Description                                                  |
+| ----------------------------------------------------------------- | ------------------------------------------------------------ |
+| kubectl version --client                                          | Shows Version of kubectl                                     |
+| kubectl run hello-world --image=<container_repository> --port=80  | Runs a Pod in Cluster (Minikube)                             |
+| kubectl get pods                                                  | Show all Pods in Cluster from default Namespace              |
+| kubectl describe pod hello-world                                  | Describes a specific Pod                                     |
+| kubectl logs hello-world<pod_name> -c hello-world<container_name> | Logs the Output of a specific Container                      |
+| kubectl port-forward pod/hello-world 8080:80                      | Port-Forwarding for Pod (only for Testing)                   |
+| kubectl delete pod hello-world/hello-world 8080:80                | Deletes a Pod                                                |
+| kubectl get nodes                                                 | Get all (Master and Worker) Nodes in Cluster                 |
+| kubectl apply -f pod.yaml                                         | Applies the given Template to create Resources               |
+| kubectl delete -f pod.yaml                                        | Deletes the Resources given in the Template                  |
+| kubectl exec -it hello-world -c hello-world -- bash               | Executes into a specific Container in a Pod                  |
+| kubectl port-forward pod/hello-world 8042:80                      | Port-forwards a specific Port from the Host to the Container |
