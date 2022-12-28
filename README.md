@@ -22,7 +22,7 @@
 ### Master Node
 
 - Master Node makes the Decision for the Cluster
-- Master Node and Worker Nodes communicate via the kubelet
+- Master Node and Worker Nodes communicate via the Kubelet
 - The Master Node contains the **Control Plane**
 
 #### Control Plane
@@ -117,6 +117,8 @@
 - Kube Proxy is an Agent that runs on each Node through a DaemonSet
 - It is responsible for local Cluster Networking where each Node gets it own unique IP Address
 - It is responsible for Routing the Network Traffic as Load Balancer for the Services
+- It maintains Network Rules to allow Communication to Pods from inside and outside the Cluster
+- It implements a Controller that watches the API Server for new Services and Endpoints
 
 ### Pods
 
@@ -127,11 +129,35 @@
   - A Pod can contain Volumes to share Data between Container (which are inside it these Pod)
   - Container inside a Pod are using as Address localhost with their own Port to communicate together
 - Init Containers are run before the Main Container
-- Side Containers support the Main container
+- Side Containers support the Main Container
+- A DaemonSet ensures that a Copy of a Pod is running across the Cluster / on each Worker Node
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/133935228-c55da185-b448-4e88-bb8c-d459802ee8af.JPG" alt="Pod" width="50%"/>
 </P>
+
+#### Resource Management
+
+- A Pod can define the minimum Amount of resources a Container needs (Request)
+- A Pod can define the maximum Amount of resources a Container can have (Limit)
+
+#### Volumes
+
+##### EmptyDir Volume
+
+- A EmptyDir Volume is a temporary Directory that shares a Pod's Lifetime
+- It is initially empty and shares Data between Containers in one Pod
+
+##### HostPath Volume
+
+- A HostPath Volume is used when Applications need to access to the underlying Host File System
+
+##### Persistent Volume
+
+- A Persistent Volume stores Data beyond the Pod Lifecycle, therefore it does not matter if a Pod fails or moves to a different Node
+- **PersistentVolume** is a Storage Resource provided by an Administrator
+- **PersistentVolumeClaim** is a User's Request for and claim to to a Persistent Volume
+- **StorageClass** describes the PArameters for a Class of Storage for which PersistentVolumes can be dynamically provided
 
 <hr>
 
@@ -143,6 +169,7 @@
 - It creates a **ReplicateSet** for an Application
 - A **ReplicateSet** ensurers that the desired Number of Pods are always running
 - ReplicaSets are using Control Loops that implements a Background Control Loop that checks the sired Number of Pods are always present on the Cluster
+- A ReplicateSet is not deleted when an new Version is released, instead it facilities for a Rollback to a previous Version
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/209465647-475647df-a426-408f-97b8-4cde0469a4e3.png" alt="Deployment" width="50%"/>
@@ -155,6 +182,7 @@
 - A Service allows to interact with Pods in a Deployment without Port-Forwarding or knowing their IP Addresses
 - The IP Address of a Service does not change - it is a stable IP Address
 - A Service has a stable IP Address, DNS Name and Port
+- It provides a Service Discovery for Application to locate each other on a Network
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/209472908-0cb1c1ad-0f53-4774-9ffa-d03180b796df.png" alt="Service" width="75%"/>
@@ -165,13 +193,15 @@
 #### ClusterIP
 
 - ClusterIP (Default) is used only for internal Access
-  <p align="center">
-    <img src="https://user-images.githubusercontent.com/29623199/209473002-685ef877-2884-4f22-b41b-14d7fdd15b7d.png" alt="Service" width="50%"/>
-  </P>
+
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/29623199/209473002-685ef877-2884-4f22-b41b-14d7fdd15b7d.png" alt="Service" width="50%"/>
+</P>
 
 #### NodePort
 
 - NodePort allows to open one specific Port an all Nodes
+
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/209473015-7b537872-1b15-4568-a817-211d328724ed.png" alt="Service" width="50%"/>
 </P>
@@ -184,9 +214,45 @@
 
 - LoadBalancer exposes the Application to the Internet
 - It creates a Load Balancer per Service
+
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/209477834-fd68f5dc-ba13-4fa9-9781-9ed158467b60.png" alt="LoadBalancer" width="50%"/>
 </P>
+
+<hr>
+
+### ConfigMaps
+
+- A ConfigMap is a Map of Key Value Pair that allows to store Configuration for an Container Images
+- It allows to reuse a Container Images on different Environments like Dev, Test, Staging and Production
+- Configuration Changes are disruptive, therefore an Application their Configuration is split
+- Changes made to ConfigMaps will not be reflected on Containers
+
+<hr>
+
+### Secrets
+
+- A Secret is used to store and manage sensitive Information
+- Sensitive Data should not be stored by using ConfigMaps
+
+<hr>
+
+### Namespaces
+
+- A Namespace organizes Objects in the Cluster
+- By Default Kubectl interacts with the default Namespace
+- The **default** Namespace is used for Objects with no other Namespace
+- The **kube-system** is used for Objects created by the Kubernetes System
+- The **kube-public** is created automatically and is readable by all Users
+- **kube-public** is mostly reserved for Cluster Usage, in Case that some Resources should be visible and readable publicly throughout the whole Cluster
+- **kube-node-lease** is used the lease Objects associated with each Node which improves the Performance of the Node Heartbeats as the Cluster Scales
+
+<hr>
+
+### StatefulSets
+
+- A StatefulSet is used to deploy and manage stateful Applications like long lived Applications such as Databases
+- It uses the Persistent Volume to store Data
 
 <hr>
 
@@ -196,7 +262,7 @@
 - One managed Kubernetes Solution is Amazon Elastic Kubernetes Service
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/29623199/133920258-c8be5005-2e30-469a-87e8-7afac12f48ad.JPG" alt="Amazon Elastic Kubernetes Service" width="75%"/>
+  <img src="https://user-images.githubusercontent.com/29623199/133920258-c8be5005-2e30-469a-87e8-7afac12f48ad.JPG" alt="Amazon Elastic Kubernetes Service" width="50%"/>
 </P>
 
 - The Amazon EKS allows as Worker Nodes for the Cluster the following Options:
@@ -237,6 +303,10 @@
   <img src="https://user-images.githubusercontent.com/29623199/133933595-afd7a003-7282-4959-abdb-faa0d680064c.JPG" alt="Kubectl" width="75%"/>
 </P>
 
+- It uses Process Health Check to check that a Application is alive and if it is not then it restarts the Process
+- Kublet uses Liveness Probes to know when to restart a Container
+- Kublet uses Readiness Probes to know when a Container is ready to start accepting Traffic
+
 #### Kubectl Commands (Declarative Management)
 
 | Command                                                           | Description                                                  |
@@ -244,12 +314,16 @@
 | kubectl version --client                                          | Shows Version of kubectl                                     |
 | kubectl run hello-world --image=<container_repository> --port=80  | Runs a Pod in Cluster (Minikube)                             |
 | kubectl get pods                                                  | Show all Pods in Cluster from default Namespace              |
+| kubectl get pods --selector="environment=test"                    | Show all Pods in Cluster with specific Label                 |
+| kubectl get pods -l 'environment in (test)'                       | Show all Pods in Cluster with specific Label                 |
 | kubectl describe pod hello-world                                  | Describes a specific Pod                                     |
 | kubectl logs hello-world<pod_name> -c hello-world<container_name> | Logs the Output of a specific Container                      |
 | kubectl port-forward pod/hello-world 8080:80                      | Port-Forwarding for Pod (only for Testing)                   |
-| kubectl delete pod hello-world/hello-world 8080:80                | Deletes a Pod                                                |
+| kubectl delete pod hello-world/hello-world                        | Deletes a specific Pod                                       |
 | kubectl get nodes                                                 | Get all (Master and Worker) Nodes in Cluster                 |
 | kubectl apply -f pod.yaml                                         | Applies the given Template to create Resources               |
 | kubectl delete -f pod.yaml                                        | Deletes the Resources given in the Template                  |
 | kubectl exec -it hello-world -c hello-world -- bash               | Executes into a specific Container in a Pod                  |
 | kubectl port-forward pod/hello-world 8042:80                      | Port-forwards a specific Port from the Host to the Container |
+| kubectl rollout history deployment hello-world                    | Shows the Rollout History for a specific Deployment          |
+| kubectl rollout undo deployment hello-world                       | Rollbacks to the previous Version of the Deployment          |

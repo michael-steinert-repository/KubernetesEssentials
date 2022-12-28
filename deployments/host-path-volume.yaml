@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hostPath
+spec:
+  selector:
+    matchLabels:
+      app: hostPath
+  template:
+    metadata:
+      labels:
+        app: hostPath
+    spec:
+      volumes:
+        - name: var-log
+          hostPath:
+            path: /var/log
+      containers:
+        - name: hostPath
+          volumeMounts:
+            - mountPath: /var/log
+              name: var-log
+              readOnly: true
+          image: busybox
+          resources:
+            limits:
+              memory: '128Mi'
+              cpu: '500m'
+          command:
+            - 'sleep'
+            - '3600'

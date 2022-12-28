@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appProperties
+data:
+  appName: hello-world
+  environment: test
+  appVersion: 1.0.0
+  tier: frontend
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginxConf
+data:
+  nginx.conf: |
+    server {
+        listen       80;
+        server_name  localhost;
+
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+        }
+
+        # Redirect Server Error Pages to the static Page /50x.html
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configMap
+spec:
+  selector:
+    matchLabels:
+      app: configMap
+  template:
+    metadata:
+      labels:
+        app: configMap
+    spec:
+      volumes:
+        - name: nginxConf
+          configMap:
+            name: nginxConf
+        - name: appProperties
+          configMap:
+            name: appProperties
+      containers:
+        - name: configMapVolume
+          volumeMounts:
+            - mountPath: /etc/order/ngnix
+              name: nginxConf
+            - mountPath: /etc/order/properties
+              name: appProperties
+          image: busybox
+          command:
+            - '/bin/sh'
+            - '-c'
+          args:
+            - 'sleep 3600'
+          resources:
+            limits:
+              memory: '128Mi'
+              cpu: '500m'
+        - name: configMapVolume
+          image: busybox
+          resources:
+            limits:
+              memory: '128Mi'
+              cpu: '500m'
+          command:
+            - '/bin/sh'
+            - '-c'
+          args:
+            - 'env && sleep 3600'
+          env:
+            - name: APP_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: appProperties
+                  key: appVersion
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: appProperties
+                  key: hello-world
+            - name: TEAM
+              valueFrom:
+                configMapKeyRef:
+                  name: appProperties
+                  key: team
+            - name: NGINX_CONF
+              valueFrom:
+                configMapKeyRef:
+                  name: nginxConf
+                  key: nginx.conf

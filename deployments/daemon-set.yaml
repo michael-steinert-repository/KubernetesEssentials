@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentdElasticsearch
+  namespace: logging
+  labels:
+    k8s-app: fluentdLogging
+spec:
+  selector:
+    matchLabels:
+      name: fluentdElasticsearch
+  template:
+    metadata:
+      labels:
+        name: fluentdElasticsearch
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: fluentdElasticsearch
+          image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+            - name: varLibDockerContainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: varLibDockerContainers
+          hostPath:
+            path: /var/lib/docker/containers
