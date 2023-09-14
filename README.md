@@ -1,15 +1,22 @@
 # Kubernetes
 
-- Kubernetes is an Application Orchestrator
-- It deploys and manages Applications
-- Applications are Containers which run Images of various Applications
-- It scales up and down the Applications according Demand
-- It allows Zero-Downtime Deployments
+- Kubernetes is an Application Orchestrator that enables the Deployment, Scaling, and Management of containerized Applications
+- Containerized Applications are Containers which run Images of different Applications
+- Kubernetes scales the containerized Applications up and down as needed, enabling Zero-Downtime Deployments
 
-## Cluster
+## Kubernetes Cluster
 
-- Cluster ist a Set of Nodes
-- A Node can be a Virtual or Physical Machine which runs in the Cloud or On Premises
+- A Kubernetes Cluster is a Group of Worker Nodes that work together as a single Unit to run containerized Applications
+- It is fundamental to the Kubernetes Architecture, providing high Availability, Fault Tolerance and Load Balancing by distributing Workloads across multiple Worker Nodes. This ensures that Applications remain accessible and responsive, even if individual Worker Nodes or Components fail
+- The Key Components of the Kubernetes Cluster are:
+  - Worker Nodes: These are the Worker Machines within the Kubernetes Cluster that host and run the Pods that encapsulate Containers. Worker Nodes provide Compute Resources, Storage and Networking Capabilities to run Containers
+  - Control Plane: This is responsible for Managing and Controlling the Kubernetes Cluster
+  - Etcd: A distributed and consistent Key-Value Store that acts as the Database of the Kubernetes Cluster. It stores critical Cluster Information such as Configuration, Health and Metadata, and is highly reliable and resilient
+- The high Availability and Fault Tolerance Considerations of a Kubernetes Cluster are:
+  - Replication of Control Plane Components: Key Components such as the API Server, Scheduler and Controller Manager are often replicated across multiple Nodes for Redundancy and Fault Tolerance
+  - Distribute Pods across multiple Nodes: Kubernetes schedules and distributes Pods across multiple Nodes to avoid a Single Point Of Failure
+  - Scale Nodes and Pods: Kubernetes allows Nodes to be dynamically added or removed to meet Resource Demands. Pods can also be scaled horizontally by Replicating them across multiple Nodes
+  - Load Balancing Traffic: Kubernetes has built-in Load Balancing Mechanisms to distribute Traffic across Nodes. Load Balancers can be configured to distribute incoming Requests across multiple Application Instances, ensuring optimal Resource Utilization and improved Application Performance
 
 ## Kubernetes Architecture
 
@@ -27,8 +34,12 @@
 
 #### Control Plane
 
-- The Control Plane is made of several Components which are communicating via the API-Server
-- Could Controller Manager communicates with the underlying Cloud Provider (for Example AWS)
+- The Control Plane consists of several Components that communicate via its API Server
+- The Cloud Controller Manager is responsible for Communicating with the underlying Cloud Provider (e.g. AWS)
+- It manages various Controllers that handle Tasks such as Node and Pod Lifecycle, Replication, and Monitoring
+- The Control Plane is an API Server that serves as the central Management Point and exposes the Kubernetes API. All Interactions with the Cluster go through the API Server
+- It is responsible for Assigning Pods to Nodes based on Resource Requirements, Constraints, and Policies
+- It is a distributed Key-Value Store that stores Cluster Configuration and Health Information, ensuring Consistency and high Availability
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/133905831-033273c3-b05f-4796-88dc-ce835dba2e5a.JPG" alt="Control Plane" width="75%"/>
@@ -60,8 +71,7 @@
 - The Controller Manager is a Daemon that manages the Control Loop
 - It watches the current State of the API Server for Changes that does not match the Desire State
 - It is a Controller of Controllers
-  - **Node Controller**: When the current State does not match the Desire State then the Node Controller reacts to
-    those Changes and establishes the Desire State
+  - **Node Controller**: If the current State does not match the desired State, the Node Controller responds to these Changes and establishes the desired State
   - **ReplicaSet**: The ReplicaSet (Controller) is responsible to ensure that the correct Number of Pods are running
   - **Endpoint**: The Endpoint (Controller) assigns Pods to Services
   - **Namespace**, **Services Accounts**, etc.
@@ -74,13 +84,11 @@
 
 ### Worker Node
 
-- Worker Nodes make the Computational Power of the Cluster - runs the Applications
-- It is a physical Machine or VM that provides the Running Environment for Applications
-- The Applications should be should split into Microservices in Order to run well on Worker Nods
-- A Worker Node consists of following three Components:
-  - **Kubelet**: Kubelet is an Agent
-  - **Container Runtime**
-  - **Kube Proxy**
+- Worker Nodes provide the Computing Power to run containerized Applications in a Kubernetes Cluster. Each Worker Node is a physical or virtual Machine with a running Environment, which forms the underlying Infrastructure of the Cluster
+- Key Components of a Worker Node include the **Kubelet** (the primary Agent responsible for Communication between the **Control Plane** and the Worker Node), the **Container Runtime** (Software responsible for running Containers, such as Docker, Containerd, or CRI-O), and the **Kube Proxy**
+- Worker Nodes require sufficient CPU, Memory, and Storage Resources, Network Connectivity, and a compatible Operating System (Linux, Windows, etc.) to host Containers, manage Volumes, enable Communication between Containers on different Worker Nodes, and interact with external Networks and Services
+- Worker Nodes manage the Lifecycle of Pods (Groups of Containers) scheduled on them by the Cluster Scheduler based on Resource Requirements and Constraints. This includes allocating the necessary Resources, ensuring that the Containers are running as expected, and Monitoring their Health and Status via the **Kubelet**
+- In Case of Worker Node Failure or Unavailability, the Control Plane reschedules the affected Pods to other available Worker Nodes to ensure high Availability and Fault Tolerance
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/133918227-22f32945-9192-4750-b4fd-be8ed340c84e.JPG" alt="Worker Node" width="50%"/>
@@ -92,8 +100,7 @@
 - It receives Pod Definition from the **API Server**
 - It interacts with the **Container Runtime** to run Containers associated with the Pod
 - it reports Node and Pod State to the **Master Node** through the **API Server**
-- It can register the Node with the **API Server** using one of: the Hostname - a Flag to override the Hostname - or
-  specific Logic for a Cloud Provider
+- It can register the Node with the **API Server** using one of the following: the Hostname, which is a Flag to override the Hostname, or specific Logic for a Cloud Provider
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/133918337-e177688b-cc7f-441c-9427-75c5f4d9453e.JPG" alt="Kubelet" width="50%"/>
@@ -105,8 +112,7 @@
 - It is responsible for running Containers of those Images and abstracts Container Management for Kubernetes
 - It provides the CRI (Container Runtime Interface) that is an Interface for third Party Container Runtime
 - It provides the Container Runtime **_containerd_** that is an Industry-Standard (besides Docker)
-  - **_containerd_**: It manages the complete Container Lifecycle of its Host System, from Image Transfer and Storage
-    to Container Execution and Supervision to Low-Level Storage to Network attachments and beyond
+  - **_containerd_** manages the complete Container Lifecycle of its Host System, from Image Transfer and Storage, through Container Execution and Monitoring, to low-level Storage, Network Attachments and beyond
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/133918601-fc82f4f2-bb9e-4bd5-be23-ee40c10e623b.JPG" alt="Container Runtime" width="50%"/>
@@ -120,17 +126,16 @@
 - It maintains Network Rules to allow Communication to Pods from inside and outside the Cluster
 - It implements a Controller that watches the API Server for new Services and Endpoints
 
+<hr>
+
 ### Pods
 
-- A Pod is the smallest deployable Unit in Kubernetes (and not Containers)
-- It is a Group of one or more Container which represents a running Process
-- It has a unique IP Address to communicate with other Pods
-- A Pod shares Network and Volumes
-  - A Pod can contain Volumes to share Data between Container (which are inside it these Pod)
-  - Container inside a Pod are using as Address localhost with their own Port to communicate together
-- Init Containers are run before the Main Container
-- Side Containers support the Main Container
-- A DaemonSet ensures that a Copy of a Pod is running across the Cluster / on each Worker Node
+- Pods are the atomic Units in Kubernetes, encapsulating one or more Containers that are scheduled and run together on a Worker Node
+- They represent a running Process with a unique IP Address and provide a shared Execution Environment that simplifies the Management, Scaling and Coordination of Containers
+- Containers within a Pod share the same Network and Storage Namespaces, allowing them to communicate via Localhost and standard inter-process Communication Mechanisms such as TCP/IP or Unix Sockets
+- Pods can also mount shared Volumes for persistent Data Access
+- The Control Plane manages the Lifecycle of Pods, based on desired States defined in the Deployment Configurations. It can scale Pods horizontally by Replicating them across multiple Worker Nodes as needed
+- **Init Containers** run before the **Main Container**, **Side Containers** support the Main Container, and a Daemon Set ensures that a Pod Copy runs across the Cluster or on each Worker Node
 
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/133935228-c55da185-b448-4e88-bb8c-d459802ee8af.JPG" alt="Pod" width="50%"/>
@@ -141,11 +146,23 @@
 - A Pod can define the minimum Amount of resources a Container needs (Request)
 - A Pod can define the maximum Amount of resources a Container can have (Limit)
 
+#### Networking
+
+- Networking is an Abstraction that defines a logical Set of Pods and a Policy for Accessing them
+- Services provide a stable Network Endpoint for Connecting to the Pods, although they may be dynamically created or terminated
+- The Networking manages incoming Network Traffic and routes it to Services within the cluster based on defined rules
+- It acts as a Reverse Proxy and Load Balancer for external Access to Services
+- CNI (Container Networking Interface) is a Specification that defines how Networking is configured for Containers
+- Various CNI Plugins are available to implement Networking solutions in Kubernetes
+
 #### Volumes
+
+- Volumes are an Abstraction that provides a Way to store Data in a Pod
+- They can be associated with one or more Containers within a Pod, allowing Data to persist even when Containers are terminated or rescheduled
 
 ##### EmptyDir Volume
 
-- A EmptyDir Volume is a temporary Directory that shares a Pod's Lifetime
+- A EmptyDir Volume is a temporary Directory that shares the Lifetime of a Pod
 - It is initially empty and shares Data between Containers in one Pod
 
 ##### HostPath Volume
@@ -156,7 +173,7 @@
 
 - A Persistent Volume stores Data beyond the Pod Lifecycle, therefore it does not matter if a Pod fails or moves to a different Node
 - **PersistentVolume** is a Storage Resource provided by an Administrator
-- **PersistentVolumeClaim** is a User's Request for and claim to to a Persistent Volume
+- **PersistentVolumeClaim** is a Request from a User for and claim to to a Persistent Volume
 - **StorageClass** describes the PArameters for a Class of Storage for which PersistentVolumes can be dynamically provided
 
 <hr>
@@ -270,8 +287,9 @@
   - AWS Fargate: AWS Fargate is used to deploy Server-less Containers
   - Amazon EC2: Amazon EC2 is used to deploy long-run Containers
 
-- Minikube
-  - Minikube is a managed Kubernetes Solution for local Development or Continuous Integration
+- Minikube is a managed Kubernetes Solution for local Development or Continuous Integration
+
+<hr>
 
 ### Minikube Commands
 
@@ -288,6 +306,8 @@
 | minikube ip --node minikube-m02      | Gets IP address of Worker Node                         |
 | minikube logs -f                     | Getting and following Logs for Master Node             |
 | minikube logs --node minikube-m02 -f | Getting and following Logs for Master Node             |
+
+<hr>
 
 ### Kubectl
 
