@@ -1,0 +1,93 @@
+# Deployment Part
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-hello-world
+  namespace: websites
+  annotations:
+    author: Michael Steinert
+# Pod Part
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: hello-world
+  template:
+    metadata:
+      labels:
+        app: hello-world
+      annotations:
+        author: Michael Steinert
+    spec:
+      containers:
+        - name: pod-hello-world
+          image: goloroden/hello-world:latest
+          env:
+            - name: MESSAGE
+              value: "Michael"
+          ports:
+            - name: http
+              containerPort: 3000
+      resources:
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+        limits:
+          cpu: "1000m"
+          # If a Container uses more than 521Mi, Kubernetes will terminate it
+          memory: "512Mi"
+      readinessProbe:
+        httpGet:
+          path: /
+          port: http
+        initialDelaySeconds: 10
+      livenessProbe:
+        httpGet:
+          path: /
+          port: http
+    # imagePullSecrets:
+    #   - name: docker-hub
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-hello-world
+  namespace: websites
+spec:
+  selector:
+    app: hello-world
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-hello-world
+  namespace: websites
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt-production
+spec:
+  ingressClassName: ingress-nginx
+  tls:
+    - hosts:
+        - hello-world.info
+      secretName: secret-hello-world
+  rules:
+    - host: hello-world.info
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hello-world
+                port:
+                  name: http

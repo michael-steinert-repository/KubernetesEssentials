@@ -181,7 +181,7 @@
 ### Deployments
 
 - Pods should be only published through a Deployment
-- A Deployment is a Kubernetes Resource that manages the Release of a new Application through Creating the Pods and Replicate Sets
+- A Deployment is a Kubernetes Resource that manages the Release / Lifecycle of a new Application through Creating the Pods and Replicate Sets
 - It provides Zero-Downtime Deployments - for Example if a Application contains a Bug and crushes the Deployment will release new Version fo the Application
 - It creates a **ReplicateSet** for an Application
 - A **ReplicateSet** ensurers that the desired Number of Pods are always running
@@ -206,8 +206,9 @@
 </P>
 
 - A Service can be one of the following Types: ClusterIP, NodePort, ExternalName and LoadBalancer
+- TODO: Write Information about Ingress Controller (Reverse Proxy) that delegates the incoming Request to the corresponding PODS
 
-#### ClusterIP
+#### Service Type: ClusterIP
 
 - ClusterIP (Default) is used only for internal Access
 
@@ -215,7 +216,7 @@
   <img src="https://user-images.githubusercontent.com/29623199/209473002-685ef877-2884-4f22-b41b-14d7fdd15b7d.png" alt="Service" width="50%"/>
 </P>
 
-#### NodePort
+#### Service Type: NodePort
 
 - NodePort allows to open one specific Port an all Nodes
 
@@ -223,11 +224,11 @@
   <img src="https://user-images.githubusercontent.com/29623199/209473015-7b537872-1b15-4568-a817-211d328724ed.png" alt="Service" width="50%"/>
 </P>
 
-#### ExternalName
+#### Service Type: ExternalName
 
 - ExternalName does not have Selectors and uses DNS Names instead
 
-#### LoadBalancer
+#### Service Type: LoadBalancer
 
 - LoadBalancer exposes the Application to the Internet
 - It creates a Load Balancer per Service
@@ -235,6 +236,14 @@
 <p align="center">
   <img src="https://user-images.githubusercontent.com/29623199/209477834-fd68f5dc-ba13-4fa9-9781-9ed158467b60.png" alt="LoadBalancer" width="50%"/>
 </P>
+
+### Ingress Controller (Reverse Proxy)
+
+- The Ingress Controller in Kubernetes acts as a Reverse Proxy, managing external Access to Services within the Cluster. It routes external HTTP and HTTPS Traffic to internal Services based on URL and other Request Attributes
+- It differs from other Service Types like ClusterIP and NodePort by Handling external Traffic and Providing a single Entry Point to the Cluster, enhancing Security and Efficiency
+- Ingress Rules define Traffic Routing, simplifying external Access Configuration and offering Features like SSL/TLS Termination, path-based Routing, and Load Balancing
+- Implemented using Tools like NGINX, HAProxy, or Traefik, the Ingress Controller requires Deployment in the Cluster and defining Ingress Resources for Traffic Routing
+- Ingress Controller centralizes Routing Rules, making Management and Updates more straightforward and efficient
 
 <hr>
 
@@ -324,8 +333,8 @@
 </P>
 
 - It uses Process Health Check to check that a Application is alive and if it is not then it restarts the Process
-- Kublet uses Liveness Probes to know when to restart a Container
-- Kublet uses Readiness Probes to know when a Container is ready to start accepting Traffic
+- Kubelet uses Liveness Probes to know when to restart a Container
+- Kubelet uses Readiness Probes to know when a Container is ready to start accepting Traffic
 
 #### Kubectl Commands (Declarative Management)
 
@@ -341,8 +350,8 @@
 | kubectl port-forward pod/hello-world 8080:80                      | Port-Forwarding for Pod (only for Testing)                   |
 | kubectl delete pod hello-world/hello-world                        | Deletes a specific Pod                                       |
 | kubectl get nodes                                                 | Get all (Master and Worker) Nodes in Cluster                 |
-| kubectl apply -f pod.yaml                                         | Applies the given Template to create Resources               |
-| kubectl delete -f pod.yaml                                        | Deletes the Resources given in the Template                  |
+| kubectl apply -f manifest.yaml                                    | Applies the given Template to create Resources               |
+| kubectl delete -f manifest.yaml                                   | Deletes the Resources given in the Template                  |
 | kubectl exec -it hello-world -c hello-world -- bash               | Executes into a specific Container in a Pod                  |
 | kubectl port-forward pod/hello-world 8042:80                      | Port-forwards a specific Port from the Host to the Container |
 | kubectl rollout history deployment hello-world                    | Shows the Rollout History for a specific Deployment          |
