@@ -478,19 +478,18 @@ containers:
 
 ### Minikube Commands
 
-| Command                              | Description                                            |
-| ------------------------------------ | ------------------------------------------------------ |
-| minikube start                       | Starts Cluster                                         |
-| minikube start --nodes=2             | Starts Cluster with two Nodes (Master and Worker Node) |
-| minikube status                      | Shows Status of Cluster                                |
-| minikube stop                        | Stops Cluster                                          |
-| minikube delete                      | Removes Cluster                                        |
-| minikube ssh --node minikube-m02     | SSH into Node                                          |
-| minikube service <node_name>         | SSH Tunnel into Node allows to interact with it        |
-| minikube ip --node minikube          | Gets IP address of Master Node                         |
-| minikube ip --node minikube-m02      | Gets IP address of Worker Node                         |
-| minikube logs -f                     | Getting and following Logs for Master Node             |
-| minikube logs --node minikube-m02 -f | Getting and following Logs for Master Node             |
+| Command                             | Description                                                                              |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| minikube start                      | Starts a Minikube Cluster with the default Configuration                                 |
+| minikube start --nodes=<number>     | Starts a Minikube Cluster with <number> Nodes (one Master and <number-1> Worker Nodes)   |
+| minikube status                     | Displays the current Status of the Minikube Cluster                                      |
+| minikube stop                       | Stops the running Minikube Cluster                                                       |
+| minikube delete                     | Deletes the Minikube Cluster and all associated Resources                                |
+| minikube ssh --node <node_name>     | SSH into a specific Node within the Minikube Cluster                                     |
+| minikube service <service_name>     | Opens a SSH Connection to a Service, allowing interaction with it from the local Machine |
+| minikube ip --node <node_name>      | Retrieves the IP Address of a specific Node in the Minikube Cluster                      |
+| minikube logs -f                    | Streams and follows the Logs of the Minikube Master Node                                 |
+| minikube logs --node <node_name> -f | Streams and follows the Logs of a specific Node in the Minikube Cluster                  |
 
 <hr>
 
@@ -509,21 +508,88 @@ containers:
 
 #### Kubectl Commands (Declarative Management)
 
-| Command                                                           | Description                                                  |
-| ----------------------------------------------------------------- | ------------------------------------------------------------ |
-| kubectl version --client                                          | Shows Version of kubectl                                     |
-| kubectl run hello-world --image=<container_repository> --port=80  | Runs a Pod in Cluster (Minikube)                             |
-| kubectl get pods                                                  | Show all Pods in Cluster from default Namespace              |
-| kubectl get pods --selector="environment=test"                    | Show all Pods in Cluster with specific Label                 |
-| kubectl get pods -l 'environment in (test)'                       | Show all Pods in Cluster with specific Label                 |
-| kubectl describe pod hello-world                                  | Describes a specific Pod                                     |
-| kubectl logs hello-world<pod_name> -c hello-world<container_name> | Logs the Output of a specific Container                      |
-| kubectl port-forward pod/hello-world 8080:80                      | Port-Forwarding for Pod (only for Testing)                   |
-| kubectl delete pod hello-world/hello-world                        | Deletes a specific Pod                                       |
-| kubectl get nodes                                                 | Get all (Master and Worker) Nodes in Cluster                 |
-| kubectl apply -f manifest.yaml                                    | Applies the given Template to create Resources               |
-| kubectl delete -f manifest.yaml                                   | Deletes the Resources given in the Template                  |
-| kubectl exec -it hello-world -c hello-world -- bash               | Executes into a specific Container in a Pod                  |
-| kubectl port-forward pod/hello-world 8042:80                      | Port-forwards a specific Port from the Host to the Container |
-| kubectl rollout history deployment hello-world                    | Shows the Rollout History for a specific Deployment          |
-| kubectl rollout undo deployment hello-world                       | Rollbacks to the previous Version of the Deployment          |
+| Command                                                      | Description                                                                                 |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| kubectl version --client                                     | Shows Version of Kubectl Client                                                             |
+| kubectl run <pod_name> --image=<image> --port=<port>         | Creates and runs a new Pod in the Cluster using the specified Image and Port                |
+| kubectl get pods                                             | Lists all Pods in the current Namespace                                                     |
+| kubectl get pods --selector="<label_selector>"               | Lists Pods in the Cluster that match a specific Label Selector                              |
+| kubectl get pods -l '<label_selector>'                       | Lists Pods in the Cluster that match a specific Label Selector                              |
+| kubectl describe pod <pod_name>                              | Displays detailed Information about a specific Pod                                          |
+| kubectl logs <pod_name> -c <container_name>                  | Retrieves the Logs from a specific Container within a Pod                                   |
+| kubectl port-forward pod/<pod_name> <local_port>:<pod_port>  | Forwards a local Port to a Port on a Pod, useful for accessing the Pod locally or testing   |
+| kubectl delete pod <pod_name>                                | Deletes a specific Pod from the Cluster                                                     |
+| kubectl get nodes                                            | Lists all Nodes in the Cluster, including both Master and Worker Nodes                      |
+| kubectl apply -f <manifest_file>                             | Applies the Configuration from a specified YAML Manifest File to create or update Resources |
+| kubectl delete -f <manifest_file>                            | Deletes Resources defined in the specified YAML Manifest File                               |
+| kubectl exec -it <pod_name> -c <container_name> -- <command> | Executes a Command inside a specific Container within a Pod interactively                   |
+| kubectl rollout history deployment/<deployment_name>         | Displays the Rollout History of a specific Deployment                                       |
+| kubectl rollout undo deployment/<deployment_name>            | Reverts a Deployment to its previous Version                                                |
+
+<hr>
+
+## Helm
+
+- **Helm** is a Package Manager for Kubernetes that simplifies the Installation, Management, and Upgrading of Applications on Kubernetes Clusters. It functions similarly to traditional Package Managers like `apt` but is specifically designed for Kubernetes.
+- Using Helm can significantly reduce the Complexity involved in deploying Applications that require multiple Kubernetes Resources, such as Deployments, Services, Config Maps, Secrets, and Persistent Volumes. Instead of manually creating and managing these Resources through separate Manifest Files, Helm allows grouping them into a single Package known as a **Chart**.
+- Helm also supports the creation of custom Charts. Custom Charts can be packaged and stored in a private or public Repository, making them reusable across multiple Deployments.
+
+### Helm Charts
+
+- **Helm Charts** are pre-configured Templates that define all the Kubernetes Resources needed to run a particular Application. Each Chart encapsulates the Details required to deploy an Application, including default Configurations, Service Definitions, and Dependencies.
+- Charts are available for a wide Range of Applications, from simple Web Servers to complex Systems like Databases and Content Management Platforms. They can be customized to meet specific Needs by overriding default Values provided within the Chart.
+
+### Deploying Applications
+
+- Helm can be configured to work with a Kubernetes Cluster by ensuring that Kubectl is properly set up. Helm uses the same Configuration Settings as Kubectl, including the Namespace Context.
+- Before deploying Applications, it is necessary to add Repositories where Helm Charts are stored. Repositories are similar to those used in other Package Managers, providing a Collection of Charts that can be searched and installed.
+
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+
+- Once a Repository is added, Applications can be deployed using a simple Command that specifies the Chart and any Custom Configurations. Helm handles the Deployment by creating all necessary Kubernetes Resources as defined in the Chart.
+
+```bash
+helm install my-webserver bitnami/nginx
+```
+
+### Managing Helm Releases
+
+- Helm tracks the History of each Application Deployment, known as a **Release**. Each Release is versioned, allowing Updates to be applied incrementally and enabling Rollbacks if something goes wrong.
+- Releases are managed through Helm Commands, which can list installed Charts, view History, and update or rollback Changes.
+
+### Customizing Helm Charts
+
+- While Helm Charts come with default Configurations, these can be customized to suit specific Requirements by providing a Values File. The Values File overrides the default Settings specified in the Chart.
+- Custom Values are passed to Helm during the Installation or Upgrade of a Chart, enabling tailored Deployments without modifying the original Chart Files.
+
+```bash
+helm install my-blog bitnami/wordpress -f custom-values.yaml
+```
+
+### Updating and Rolling Back Helm Releases
+
+- Helm allows Updates to be made to an existing Release by specifying new Values or applying a newer Version of the Chart. If an Update introduces Issues, Helm provides the Capability to rollback to a previous Release.
+- The Rollback Command reverts the Deployment to a specific **Revision**, making it easy to undo Changes that have caused Problems.
+
+```bash
+helm rollback my-blog 1
+```
+
+### Helm Commands
+
+| Command                                 | Description                                                              |
+| --------------------------------------- | ------------------------------------------------------------------------ |
+| helm repo add <name> <url>              | Adds a new Helm Repository to the local Configuration                    |
+| helm repo list                          | Lists all Repositories that have been added to the local Configuration   |
+| helm search repo <keyword>              | Searches for Helm Charts in the configured Repositories                  |
+| helm install <release_name> <chart>     | Installs a Helm Chart with the specified Release Name                    |
+| helm list                               | Lists all Helm Releases in the current Namespace                         |
+| helm upgrade <release_name> <chart>     | Upgrades an existing Helm Release with a new Chart or updated Values     |
+| helm rollback <release_name> <revision> | Rollbacks a Helm Release to a specific Revision Number                   |
+| helm uninstall <release_name>           | Uninstalls a Helm Release and removes all associated Kubernetes Objects. |
+| helm show values <chart>                | Displays the default Values for a specific Chart                         |
+| helm history <release_name>             | Shows the History of a specific Helm Release, including all Revisions    |
+| helm template <chart>                   | Renders the Chart Templates locally without installing them              |
+| helm get all <release_name>             | Retrieves all Information about a deployed Release                       |
